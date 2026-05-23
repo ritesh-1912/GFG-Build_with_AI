@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Dev Card Generator</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23161b22'/%3E%3Cpath fill='%232ea043' d='M9 9h14v14H9z'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d1117;
+        --card-bg: #161b22;
+        --text: #c9d1d9;
+        --text-dim: #8b949e;
+        --primary: #238636;
+        --primary-hover: #2ea043;
+        --error: #f85149;
+        --border: #30363d;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Helvetica,
+          Arial,
+          sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #f0f6fc;
+      }
+
+      p.subheading {
+        font-size: 1.1rem;
+        color: var(--text-dim);
+        margin-bottom: 2.5rem;
+      }
+
+      .input-group {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 16px;
+        background-color: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        border-color: #58a6ff;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+      }
+
+      button {
+        padding: 12px 24px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background-color 0.2s,
+          transform 0.1s;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Results Area */
+      #result-container {
+        display: none;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+
+      #result-container.visible {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .card-wrapper {
+        margin: 0 auto 20px;
+        display: inline-block;
+        text-align: left;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-secondary {
+        background-color: #21262d;
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background-color: #30363d;
+      }
+
+      /* Loading Skeleton */
+      .skeleton {
+        display: none;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        width: 450px;
+        margin: 0 auto;
+      }
+
+      .skeleton-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .skeleton-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #30363d;
+      }
+
+      .skeleton-info {
+        flex: 1;
+        margin-left: 20px;
+      }
+
+      .skeleton-line {
+        height: 12px;
+        background: #30363d;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+
+      .pulse {
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* Error state */
+      .error-message {
+        display: none;
+        color: var(--error);
+        background: rgba(248, 81, 73, 0.1);
+        border: 1px solid var(--error);
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+      }
+
+      #ai-commentary {
+        margin-top: 20px;
+        font-style: italic;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>GitHub Dev Card</h1>
+      <p class="subheading">
+        Generate a beautiful developer profile card with AI insights.
+      </p>
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter GitHub username (e.g., torvalds)"
+          spellcheck="false"
+        />
+        <button id="generate-btn" onclick="generateCard()">
+          Generate Card
+        </button>
+      </div>
+
+      <!-- Loading Skeleton -->
+      <div id="loader" class="skeleton">
+        <div class="skeleton-header">
+          <div class="skeleton-avatar pulse"></div>
+          <div class="skeleton-info">
+            <div class="skeleton-line pulse" style="width: 60%"></div>
+            <div class="skeleton-line pulse" style="width: 40%"></div>
+          </div>
+        </div>
+        <div class="skeleton-line pulse" style="width: 100%"></div>
+        <div class="skeleton-line pulse" style="width: 90%"></div>
+        <div
+          class="skeleton-line pulse"
+          style="width: 100%; margin-top: 20px"
+        ></div>
+      </div>
+
+      <!-- Result Area -->
+      <div id="result-container">
+        <div id="card-render" class="card-wrapper"></div>
+        <div class="actions">
+          <button class="btn-secondary" onclick="copyUrl()">Copy URL</button>
+          <button class="btn-secondary" onclick="downloadImage()">
+            Open Original
+          </button>
+        </div>
+        <p id="ai-commentary"></p>
+      </div>
+
+      <!-- Error Message -->
+      <div id="error-box" class="error-message"></div>
+    </div>
+
+    <script>
+      const injectedBackendUrl = "${BACKEND_URL}".trim();
+
+      function normalizeBase(url) {
+        return url.replace(/\/$/, "");
+      }
+
+      function inferCloudRunBackendOrigin() {
+        const origin = window.location.origin;
+        if (
+          origin.includes("-frontend-") &&
+          origin.endsWith(".run.app")
+        ) {
+          return origin.replace("-frontend-", "-backend-");
+        }
+        return origin;
+      }
+
+      const API_BASE = normalizeBase(
+        injectedBackendUrl ||
+          (window.location.protocol === "https:"
+            ? inferCloudRunBackendOrigin()
+            : "http://localhost:8080"),
+      );
+      let lastCardUrl = "";
+
+      async function generateCard() {
+        const usernameInput = document.getElementById("username");
+        const username = usernameInput.value.trim();
+        if (!username) return;
+
+        const btn = document.getElementById("generate-btn");
+        const loader = document.getElementById("loader");
+        const result = document.getElementById("result-container");
+        const errorBox = document.getElementById("error-box");
+
+        // Reset UI
+        btn.disabled = true;
+        errorBox.style.display = "none";
+        result.classList.remove("visible");
+        setTimeout(() => {
+          if (!result.classList.contains("visible"))
+            result.style.display = "none";
+        }, 500);
+        loader.style.display = "block";
+
+        try {
+          const response = await fetch(`${API_BASE}/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            lastCardUrl = `${API_BASE}${data.card_url}`;
+            document.getElementById("card-render").innerHTML = data.html;
+            document.getElementById("ai-commentary").innerText =
+              data.message || "";
+
+            loader.style.display = "none";
+            result.style.display = "block";
+            setTimeout(() => result.classList.add("visible"), 50);
+          } else {
+            throw new Error(data.error || "Failed to generate card");
+          }
+        } catch (err) {
+          loader.style.display = "none";
+          errorBox.innerText = err.message;
+          errorBox.style.display = "block";
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      function copyUrl() {
+        if (!lastCardUrl) return;
+        navigator.clipboard.writeText(lastCardUrl);
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => (btn.innerText = originalText), 2000);
+      }
+
+      function downloadImage() {
+        if (lastCardUrl) window.open(lastCardUrl, "_blank");
+      }
+
+      // Allow Enter key to trigger generation
+      document.getElementById("username").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") generateCard();
+      });
+    </script>
+  </body>
+</html>
